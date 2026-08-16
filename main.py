@@ -25,7 +25,7 @@ async def read_index():
         return FileResponse("index.html")
     raise HTTPException(status_code=404, detail="index.html が見つかりません。")
 
-# 🌐 【修正】ログインボタンの移動先「/swap-page」でも顔変換画面を開けるように対応しました！
+# 🌐 ログインボタンの移動先「/swap-page」でも顔変換画面を開けるように対応しました！
 @app.get("/swap-page")
 async def read_swap_page():
     if os.path.exists("swap.html"):
@@ -41,7 +41,8 @@ async def read_html(filename: str):
     raise HTTPException(status_code=404, detail=f"{file_path} が見つかりません。")
 
 
-# 【環境設定】ReplicateのAPIトークン
+# ✨【GitHubテスト用】ここに新しい文字を追加しました！
+# この1行が追加されたことを、GitHub Desktopが自動で気がついてくれます。
 os.environ["REPLICATE_API_TOKEN"] = "r8_36p22Hshjsh62HajGshahhaHjHShas72Hahs"
 
 # 🛠️ MySQL（XAMPP）の接続設定
@@ -85,7 +86,7 @@ async def register_user(username: str = Form(...), email: str = Form(...), passw
         conn.close()
 
 
-# 🔑 ログインの処理（ここでの案内先も /swap-page に合わせて修正しました）
+# 🔑 ログインの処理
 @app.post("/login")
 async def login_user(username: str = Form(...), password: str = Form(...)):
     conn = get_db_connection()
@@ -125,7 +126,7 @@ async def swap_face(target_image: UploadFile = File(...), source_image: UploadFi
         )
         row = cursor.fetchone()
 
-        if row and row[0] >= 10:
+        if row and row >= 10:
             raise HTTPException(status_code=429, detail="本日の利用上限（10回）に達しました。")
 
         if target_image.content_type not in ["image/jpeg", "image/png"]:
