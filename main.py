@@ -60,7 +60,7 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-# 👤 アカウント新規登録の処理
+# 👤 アカウント新規登録 of ユーザーの処理
 @app.post("/register")
 async def register_user(username: str = Form(...), email: str = Form(...), password: str = Form(...)):
     conn = get_db_connection()
@@ -109,10 +109,11 @@ async def login_user(username: str = Form(...), password: str = Form(...)):
         conn.close()
 
 
-# 🎭 【重要：修正】どんなURLの書き方で送られてきても、すべてここで受け取って処理します！
+# 🎭 【重要：修正】黒い画面の証拠「/do-swap」でも完璧に受け取れるように合体させました！
 @app.post("/swap-face")
 @app.post("/swap_face")
 @app.post("/swapface")
+@app.post("/do-swap")  # 👈 画面から送られてくる本物のURLを追加！
 async def swap_face(target_image: UploadFile = File(...), source_image: UploadFile = File(...)):
     user_id = 1
     today = date.today()
