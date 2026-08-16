@@ -2,73 +2,188 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>AI顔変換スタジオ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI顔変換 - メイン画面</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f0f2f5; }
-        .box { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 450px; text-align: left; }
-        h3 { margin-top: 0; color: #333; text-align: center; }
-        input { margin: 15px 0; display: block; width: 95%; }
-        button { background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 15px; font-weight: bold; }
-        button:hover { background: #218838; }
-        #loading { display: none; margin-top: 20px; color: #666; font-weight: bold; text-align: center; }
-        #result-box { margin-top: 30px; display: none; text-align: center; }
-        #result-img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .upload-box {
+            border: 2px dashed #cbd5e0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+            cursor: pointer;
+        }
+        .upload-box:hover {
+            border-color: #4a5568;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        button {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2b6cb0;
+        }
+        #result-container {
+            margin-top: 30px;
+            display: none;
+        }
+        #result-img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+            color: #4a5568;
+            font-weight: bold;
+        }
+        .nav-links {
+            margin-top: 20px;
+        }
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
-    <h2 style="text-align: center;">🎨 AI顔変換スタジオ</h2>
+<div class="container">
+    <h1>AI顔変換システム</h1>
+    <p>入れ替えたい2枚の画像をアップロードしてください。</p>
 
-    <div class="box" style="margin: 0 auto; display: block;">
-        <h3>画像をアップロードしてください</h3>
-        <label><strong>【ベース写真】</strong> 体や背景を使う写真：
-            <input type="file" id="target-img" accept="image/*">
-        </label>
-        <br>
-        <label><strong>【顔写真】</strong> 入れ替えたい顔の写真：
-            <input type="file" id="source-img" accept="image/*">
-        </label>
-        <button onclick="startSwap()">✨ 顔を変換する</button>
-        <div id="loading">⏳ AIが顔を変換しています...（約10秒〜20秒かかります）</div>
-    </div>
+    <form id="swap-form">
+        <!-- 1枚目：ターゲット（体になる画像） -->
+        <div class="upload-box" onclick="document.getElementById('target_image').click()">
+            <p id="target-text">① ベースになる画像（体・元写真）を選択</p>
+            <input type="file" id="target_image" name="target_image" accept="image/*" required onchange="previewFile('target_image', 'target-preview', 'target-text')">
+            <img id="target-preview" class="preview-img" alt="ターゲットプレビュー">
+        </div>
 
-    <div id="result-box" class="box" style="margin: 30px auto 0 auto; display: none;">
-        <h3>🎉 変換結果</h3>
+        <!-- 2枚目：ソース（顔を持ってくる画像） -->
+        <div class="upload-box" onclick="document.getElementById('source_image').click()">
+            <p id="source-text">② はめ込みたい顔画像を選択</p>
+            <input type="file" id="source_image" name="source_image" accept="image/*" required onchange="previewFile('source_image', 'source-preview', 'source-text')">
+            <img id="source-preview" class="preview-img" alt="ソースプレビュー">
+        </div>
+
+        <button type="submit">顔変換を実行する</button>
+    </form>
+
+    <div class="loading" id="loading-text">AIが顔を変換しています... (15秒〜30秒ほどかかります)</div>
+
+    <!-- 変換結果の表示エリア -->
+    <div id="result-container">
+        <h3>✨ 変換結果 ✨</h3>
         <img id="result-img" src="" alt="変換後の画像">
-        <br><br>
-        <p style="text-align: center;">画像を右クリックして保存してね！</p>
     </div>
 
-    <script>
-        async function startSwap() {
-            const targetInput = document.getElementById('target-img');
-            const sourceInput = document.getElementById('source-img');
-            if (targetInput.files.length === 0 || sourceInput.files.length === 0) {
-                alert('画像を2枚とも選んでください！');
-                return;
-            }
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('result-box').style.display = 'none';
+    <div class="nav-links">
+        <a href="legal.html">利用規約・プライバシーポリシー</a>
+    </div>
+</div>
 
-            const formData = new FormData();
-            formData.append('target', targetInput.files[0]);
-            formData.append('source', sourceInput.files[0]);
+<script>
+    // 画像を選択したときに画面にミニプレビューを表示する機能
+    function previewFile(inputId, previewId, textId) {
+        const file = document.getElementById(inputId).files[0];
+        const preview = document.getElementById(previewId);
+        const text = document.getElementById(textId);
+        const reader = new FileReader();
 
-            try {
-                const response = await fetch('/do-swap', { method: 'POST', body: formData });
-                const data = await response.json();
-                if (response.ok) {
-                    document.getElementById('result-img').src = data.result_url;
-                    document.getElementById('result-box').style.display = 'block';
-                } else {
-                    alert('エラーが発生しました: ' + (data.detail || '失敗しました'));
-                }
-            } catch (error) {
-                alert('通信エラーが発生しました。');
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
+        reader.addEventListener("load", function () {
+            preview.src = reader.result;
+            preview.style.display = "block";
+            text.style.display = "none";
+        }, false);
+
+        if (file) {
+            reader.readAsDataURL(file);
         }
-    </script>
+    }
+
+    // 「顔変換を実行する」ボタンを押したときの処理
+    document.getElementById('swap-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('target_image', document.getElementById('target_image').files[0]);
+        formData.append('source_image', document.getElementById('source_image').files[0]);
+
+        // 画面の表示を切り替える（ローディングを出す）
+        document.getElementById('loading-text').style.display = 'block';
+        document.getElementById('result-container').style.display = 'none';
+
+        try {
+            // 🛠️ 【修正】Pythonサーバーへ確実に届くようにURLを「/swap-face」に完全一致させました
+            const response = await fetch('/swap-face', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || '変換エラーが発生しました。');
+            }
+
+            const data = await response.json();
+
+            // AIから返ってきた画像のURLを画面に表示する
+            document.getElementById('result-img').src = data.result_url;
+            document.getElementById('result-container').style.display = 'block';
+        } catch (error) {
+            alert('エラーが発生しました: ' + error.message);
+        } finally {
+            // ローディングを消す
+            document.getElementById('loading-text').style.display = 'none';
+        }
+    });
+</script>
+
 </body>
 </html>
