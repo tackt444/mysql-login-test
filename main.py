@@ -41,8 +41,7 @@ async def read_html(filename: str):
     raise HTTPException(status_code=404, detail=f"{file_path} が見つかりません。")
 
 
-# ✨【GitHubテスト用】ここに新しい文字を追加しました！
-# この1行が追加されたことを、GitHub Desktopが自動で気がついてくれます。
+# 【環境設定】ReplicateのAPIトークン
 os.environ["REPLICATE_API_TOKEN"] = "r8_36p22Hshjsh62HajGshahhaHjHShas72Hahs"
 
 # 🛠️ MySQL（XAMPP）の接続設定
@@ -110,8 +109,10 @@ async def login_user(username: str = Form(...), password: str = Form(...)):
         conn.close()
 
 
-# 🎭 顔変換の処理
+# 🎭 【重要：修正】どんなURLの書き方で送られてきても、すべてここで受け取って処理します！
 @app.post("/swap-face")
+@app.post("/swap_face")
+@app.post("/swapface")
 async def swap_face(target_image: UploadFile = File(...), source_image: UploadFile = File(...)):
     user_id = 1
     today = date.today()
@@ -126,7 +127,7 @@ async def swap_face(target_image: UploadFile = File(...), source_image: UploadFi
         )
         row = cursor.fetchone()
 
-        if row and row >= 10:
+        if row and row[0] >= 10:
             raise HTTPException(status_code=429, detail="本日の利用上限（10回）に達しました。")
 
         if target_image.content_type not in ["image/jpeg", "image/png"]:
