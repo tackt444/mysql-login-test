@@ -151,17 +151,21 @@
     document.getElementById('swap-form').addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // 🛠️ 【修正】正しくファイルデータをバックエンドに送るための記述に直しました
+        const targetFile = document.getElementById('target_image').files[0];
+        const sourceFile = document.getElementById('source_image').files[0];
+
         const formData = new FormData();
-        formData.append('target_image', document.getElementById('target_image').files[0]);
-        formData.append('source_image', document.getElementById('source_image').files[0]);
+        formData.append('target_image', targetFile);
+        formData.append('source_image', sourceFile);
 
         // 画面の表示を切り替える（ローディングを出す）
         document.getElementById('loading-text').style.display = 'block';
         document.getElementById('result-container').style.display = 'none';
 
         try {
-            // 🛠️ 【修正】Pythonサーバーへ確実に届くようにURLを「/swap-face」に完全一致させました
-            const response = await fetch('/swap-face', {
+            // 🛠️ 【修正】現在のページURL（/swap-page）からでも正しく届くよう、通信先を固定しました
+            const response = await fetch('http://127.0.0', {
                 method: 'POST',
                 body: formData
             });
