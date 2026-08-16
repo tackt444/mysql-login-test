@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>AI顔変換システム（有料対応版）</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f0f2f5; }
+        .box { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 10px; width: 300px; text-align: left; }
+        h3 { margin-top: 0; color: #333; text-align: center; }
+        input { margin: 10px 0; display: block; width: 93%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
+        button:hover { background: #0056b3; }
+        .msg { margin-top: 15px; color: red; font-size: 14px; text-align: center; font-weight: bold; }
+        .footer { margin-top: 30px; font-size: 13px; }
+        .footer a { color: #666; text-decoration: none; margin: 0 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>🚪 会員制 AI顔変換システム</h2>
+
+    <div class="box">
+        <h3>👤 新規会員登録</h3>
+        <input type="text" id="reg-username" placeholder="ユーザー名">
+        <input type="email" id="reg-email" placeholder="メールアドレス">
+        <input type="password" id="reg-password" placeholder="パスワード">
+        <button onclick="register()">アカウント作成</button>
+        <div id="reg-msg" class="msg" style="color: green;"></div>
+    </div>
+
+    <div class="box">
+        <h3>🔑 ログイン</h3>
+        <input type="text" id="login-username" placeholder="ユーザー名">
+        <input type="password" id="login-password" placeholder="パスワード">
+        <button onclick="login()">ログインする</button>
+        <div id="login-msg" class="msg"></div>
+    </div>
+
+    <!-- 📜 ここが法律・規約のリンクです！表示されていない場合はここが入っていません -->
+    <div class="footer">
+        <a href="/legal" target="_blank">📄 利用規約・プライバシーポリシー</a> |
+        <a href="/legal" target="_blank">⚖️ 特定商取引法に基づく表記</a>
+    </div>
+
+    <script>
+        async function register() {
+            const user = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-password').value;
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `username=${encodeURIComponent(user)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(pass)}`
+            });
+            const data = await response.json();
+            document.getElementById('reg-msg').innerText = data.message;
+        }
+
+        async function login() {
+            const user = document.getElementById('login-username').value;
+            const pass = document.getElementById('login-password').value;
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`
+            });
+            const data = await response.json();
+            if (response.ok) {
+                window.location.href = "/swap-page";
+            } else {
+                document.getElementById('login-msg').style.color = "red";
+                document.getElementById('login-msg').innerText = data.detail || data.message;
+            }
+        }
+    </script>
+</body>
+</html>

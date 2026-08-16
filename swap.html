@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>AI顔変換スタジオ</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f0f2f5; }
+        .box { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 450px; text-align: left; }
+        h3 { margin-top: 0; color: #333; text-align: center; }
+        input { margin: 15px 0; display: block; width: 95%; }
+        button { background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 15px; font-weight: bold; }
+        button:hover { background: #218838; }
+        #loading { display: none; margin-top: 20px; color: #666; font-weight: bold; text-align: center; }
+        #result-box { margin-top: 30px; display: none; text-align: center; }
+        #result-img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">🎨 AI顔変換スタジオ</h2>
+
+    <div class="box" style="margin: 0 auto; display: block;">
+        <h3>画像をアップロードしてください</h3>
+        <label><strong>【ベース写真】</strong> 体や背景を使う写真：
+            <input type="file" id="target-img" accept="image/*">
+        </label>
+        <br>
+        <label><strong>【顔写真】</strong> 入れ替えたい顔の写真：
+            <input type="file" id="source-img" accept="image/*">
+        </label>
+        <button onclick="startSwap()">✨ 顔を変換する</button>
+        <div id="loading">⏳ AIが顔を変換しています...（約10秒〜20秒かかります）</div>
+    </div>
+
+    <div id="result-box" class="box" style="margin: 30px auto 0 auto; display: none;">
+        <h3>🎉 変換結果</h3>
+        <img id="result-img" src="" alt="変換後の画像">
+        <br><br>
+        <p style="text-align: center;">画像を右クリックして保存してね！</p>
+    </div>
+
+    <script>
+        async function startSwap() {
+            const targetInput = document.getElementById('target-img');
+            const sourceInput = document.getElementById('source-img');
+            if (targetInput.files.length === 0 || sourceInput.files.length === 0) {
+                alert('画像を2枚とも選んでください！');
+                return;
+            }
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result-box').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('target', targetInput.files[0]);
+            formData.append('source', sourceInput.files[0]);
+
+            try {
+                const response = await fetch('/do-swap', { method: 'POST', body: formData });
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('result-img').src = data.result_url;
+                    document.getElementById('result-box').style.display = 'block';
+                } else {
+                    alert('エラーが発生しました: ' + (data.detail || '失敗しました'));
+                }
+            } catch (error) {
+                alert('通信エラーが発生しました。');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
